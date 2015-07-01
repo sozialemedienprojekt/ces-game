@@ -1,0 +1,69 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <h:head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="#{resource['images:hub/favicon.ico']}" type="image/x-icon" />
+        <title>
+            <ui:insert name="title">Default Title</ui:insert>
+        </title>
+        <h:outputStylesheet name="template/hub.css" library="css" />
+        <ui:insert name="scripts"></ui:insert>
+        <ui:insert name="stylesheets"></ui:insert>
+    </h:head>
+    <h:body>
+        <h:panelGroup layout="block" id="all">
+            <h:panelGroup layout="block" id="main">
+                <noscript><h1 style="color:rgb(153,0,0);text-align:center;">#{i18n_txts.msg_javascript_disabled}</h1></noscript>
+                <h:panelGroup layout="block" id="top">
+                    <h:panelGroup layout="block" id="picture"><a href="http://www.hu-berlin.de"><img src="#{resource['images:hub/hu-mainbuilding.jpg']}" alt="HU main building" width="360" height="110" border="0" style="position: absolute; bottom: 23px;" /></a></h:panelGroup>
+                    <h:panelGroup layout="block" id="logo"><a href="http://www.hu-berlin.de"><img src="#{resource['images:hub/hukombi_bbw.jpg']}" alt="Humbold-Universit&auml;t zu Berlin" width="450" height="90" border="0" /></a></h:panelGroup>
+                    <h:panelGroup layout="block" id="location">
+                        <ui:fragment rendered="#{not empty facesContext.externalContext.remoteUser}">
+                            <h:form id="logout">
+                                <h:outputLabel value="#{i18n_txts.lbl_remote_user} " style="font-weight: bold;"/>
+                                <h:outputLabel id="remote_user_name" value="#{facesContext.externalContext.remoteUser}" />
+                                <h:commandLink action="#{Authentication.logout()}" style="vertical-align:bottom;">
+                                    <h:graphicImage url="#{resource['images:hub/logout.svg']}" width="20px" height="20px" style="vertical-align:bottom;" />
+                                </h:commandLink>
+                            </h:form>
+                        </ui:fragment>
+                        <ui:fragment rendered="#{empty facesContext.externalContext.remoteUser}">
+                            <form action="j_security_check" method="POST">
+                                <label for="j_username">#{i18n_txts.lbl_username}:</label>
+                                <input type="text" name="j_username" size="5" maxlength="45" title="#{i18n_txts.lbl_username}"/>
+                                <label for="j_password">#{i18n_txts.lbl_password}:</label>
+                                <input type="password" name="j_password" size="5" maxlength="45" title="#{i18n_txts.lbl_password}" />
+                                <button id="submit" disabled="true" type="submit" name="submit" style="border:none;background:none;cursor:pointer;vertical-align:bottom;" value="submit"><img src="#{resource['images:hub/login.svg']}" width="20px" height="20px" style="vertical-align:bottom" title="#{i18n_txts.btn_login}" /></button>
+                            </form>
+                            <script type="text/javascript">
+                                var submit = document.getElementById("submit");
+                                if (!("WebSocket" in window)) {
+                                    submit.disabled = true;
+                                } else {
+                                    submit.disabled = false;
+                                }
+                            </script>
+                        </ui:fragment>
+
+                    </h:panelGroup>
+                    <h:panelGroup layout="block" id="navigation">
+                        #{i18n_txts.cses_group_name_part1} <span class="menu-divider">|</span> #{i18n_txts.cses_group_name_part2}
+                    </h:panelGroup>
+                </h:panelGroup>
+
+                <h:panelGroup layout="block" style="clear:both;"/>
+
+                <h:panelGroup layout="block" id="content">
+                    <ui:insert name="content_header"></ui:insert>
+                    <f:view><ui:insert name="content">Content</ui:insert></f:view>
+                </h:panelGroup>
+            </h:panelGroup>
+            <h:panelGroup layout="block" style="clear: both;"></h:panelGroup>
+        </h:panelGroup>
+    </h:body>
+</html>

@@ -1,0 +1,185 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+    <ui:composition template="./../resources/templates/hub.xhtml">
+
+        <ui:define name="stylesheets">
+            <h:outputStylesheet name="game/default.css" library="css" />
+        </ui:define>
+        <ui:define name="title">CES-Game - #{i18n_txts.loc_game_setup}</ui:define>
+        <ui:define name="bread_crumbs"></ui:define>
+        <ui:define name="content_header"><h:form><p:menu binding="#{NavigationBar.menu}" /></h:form></ui:define>
+
+        <f:metadata>
+            <f:viewParam name="game-id" value="#{SetupBean.gameId}"/>
+        </f:metadata>
+
+        <ui:define name="content">
+            <h:form id="form">
+                <p:messages />
+                <p:panel header="#{i18n_txts.loc_game_setup}">
+                    <!-- select game -->
+                    <h:panelGrid columns="3" style="margin-bottom:10px" cellpadding="5">
+                        <p:outputLabel for="game" value="#{i18n_txts.lbl_game}: "/>
+                        <p:selectOneMenu id="game" value="#{SetupBean.game}" converter="omnifaces.SelectItemsConverter">
+                            <f:selectItem itemLabel="#{i18n_txts.lbl_please_choose}" itemDisabled="true"/>
+                            <f:selectItems value="#{SetupBean.games}" var="game" itemLabel="#{game.identifier}" itemValue="#{game}" />
+                            <p:ajax event="change" update="@form" process="@this" listener="#{SetupBean.selectGame()}" oncomplete="console.log('game selected');" />
+                        </p:selectOneMenu>
+                        <p:message for="game" />
+
+                    </h:panelGrid>
+                    <p:outputPanel id="password_panel" rendered="#{not empty SetupBean.game and not SetupBean.unlocked}">
+                        <h:panelGrid columns="4" cellpadding="5">
+                            <p:outputLabel for="pwd" value="#{i18n_txts.lbl_password}:" />
+                            <p:password id="pwd" value="#{SetupBean.password}" label="#{i18n_txts.lbl_password}" required="true" />
+                            <p:commandButton process="password_panel" action="#{SetupBean.unlock()}" update="@form" value="unlock" />
+                            <p:message for="pwd" />
+                        </h:panelGrid>
+                    </p:outputPanel>
+                    <p:outputPanel id="gamePanel">
+
+                        <p:outputPanel rendered="#{SetupBean.unlocked and not empty SetupBean.game and not empty SetupBean.game.economy.companies}">
+
+                            <h:panelGrid columns="4" cellpadding="5" id="bla">
+                                <p:outputLabel for="company" value="#{i18n_txts.lbl_company}: "/>
+                                <p:selectOneMenu id="company" value="#{SetupBean.company}" converter="omnifaces.SelectItemsConverter">
+                                    <f:selectItem itemLabel="#{i18n_txts.lbl_please_choose}" itemDisabled="true"/>
+                                    <f:selectItems value="#{SetupBean.game.economy.companies}" var="company" itemLabel="#{company.identifier}" itemValue="#{company}"  />
+                                    <p:ajax event="change" update="gamePanel" listener="#{SetupBean.selectCompany()}" />
+                                </p:selectOneMenu>
+                                <p:message for="company" />
+                                <p:commandButton value="#{i18n_txts.btn_delete}" rendered="#{not empty SetupBean.company}" action="#{SetupBean.removeCompany()}" process="@this" update="@form" />
+                            </h:panelGrid>
+                        </p:outputPanel>
+                    </p:outputPanel>
+                    <p:outputPanel id="create_company">
+                        <p:outputPanel rendered="#{not empty SetupBean.game and SetupBean.unlocked}">
+                            <h:panelGrid columns="2">
+                                <p:outputLabel value="#{i18n_txts.lbl_company_name}: " />
+                                <h:panelGroup layout="block">
+                                    <p:inputText id="company_name" value="#{SetupBean.companyIdentifier}" required="true" >
+                                        <f:validateLength minimum="5" maximum="255" />
+                                        <p:ajax event="change" process="create_company" update="create_company" />
+                                    </p:inputText>
+                                    <p:message for="company_name" />
+                                </h:panelGroup>
+                                <p:outputLabel value="#{i18n_txts.lbl_sector}: " />
+                                <p:outputPanel id="sector_panel">
+                                    <p:selectOneMenu id="market_sector" value="#{SetupBean.sector}" converter="omnifaces.SelectItemsConverter">
+                                        <f:selectItem itemLabel="#{i18n_txts.lbl_please_choose}" itemDisabled="true"/>
+                                        <f:selectItems value="#{SetupBean.game.economy.market.sectors}" var="sector" itemLabel="#{I18nTextUtil.get(sector.description)}" />
+                                        <p:ajax event="change" process="create_company" update="create_company" listener="#{SetupBean.setMarketSector()}" />
+                                    </p:selectOneMenu>
+                                    <p:commandLink styleClass="fa fa-question" process="@this" rendered="#{not empty SetupBean.sector}" update="market_sector_info_panel" oncomplete="PF('marketSectorOP').show('#{component.clientId}')" title="View" />
+                                    <p:message for="market_sector" />
+                                </p:outputPanel>
+                                <p:outputLabel value="#{i18n_txts.lbl_factory_type}: " />
+                                <p:outputPanel id="factoryPanel" rendered="#{not empty SetupBean.sector}">
+                                    <p:selectOneMenu id="factory" value="#{SetupBean.factory}" converter="omnifaces.SelectItemsConverter">
+                                        <f:selectItem itemLabel="#{i18n_txts.lbl_please_choose}" itemDisabled="true"/>
+                                        <f:selectItems value="#{SetupBean.sector.factories}" var="factory" itemLabel="#{I18nTextUtil.get(factory.description)}" />
+                                        <p:ajax event="change" update="create_company" />
+                                    </p:selectOneMenu>
+                                    <p:commandLink styleClass="fa fa-question" process="@this" rendered="#{not empty SetupBean.factory}" update="factory_info_panel" oncomplete="PF('factoryOP').show('#{component.clientId}')" title="View" />
+                                    <p:message for="factory" />
+                                </p:outputPanel>
+                                <p:commandButton process="create_company" rendered="#{not empty SetupBean.sector and not empty SetupBean.factory}" action="#{SetupBean.createCompany()}" update="@form" value="#{i18n_txts.btn_create}" />
+                                <p:commandButton value="#{i18n_txts.btn_reset}" rendered="#{not empty SetupBean.sector and not empty SetupBean.factory}" action="#{SetupBean.createCompany()}" immediate="true" ajax="false" style="margin-right:20px;" actionListener="#{SetupBean.cancel}">
+                                    <p:resetInput target="@form" />
+                                </p:commandButton>
+                            </h:panelGrid>
+                        </p:outputPanel>
+                    </p:outputPanel>
+
+                </p:panel>
+
+                <p:overlayPanel id="market_sector_info" widgetVar="marketSectorOP" showEffect="fade" dismissable="true" showCloseIcon="true">
+                    <p:outputPanel id="market_sector_info_panel">
+                        <p:panelGrid columns="2">
+                            <p:outputLabel value="#{i18n_txts.lbl_sector}: " />
+                            <p:outputLabel value="#{I18nTextUtil.get(SetupBean.sector.description)}" />
+                            <p:outputLabel value="#{i18n_txts.lbl_producible_products}: " />
+                            <h:dataTable cellpadding="0" cellspacing="0"  value="#{SetupBean.sector.finalProducts}" var="finalProduct">
+                                <h:column>
+                                    <h:panelGrid columns="2">
+                                        <p:outputLabel value="#{I18nTextUtil.get(finalProduct.description)}" />
+                                        <p:commandLink update=":form:final_product_info_panel" oncomplete="PF('finalProductOP').show('#{component.clientId}')" title="View Detail" styleClass="fa fa-question">
+                                            <f:setPropertyActionListener value="#{finalProduct}" target="#{SetupBean.finalProduct}" />
+                                        </p:commandLink>
+                                    </h:panelGrid>
+                                </h:column>
+                            </h:dataTable>
+                        </p:panelGrid>
+                    </p:outputPanel>
+                </p:overlayPanel>
+
+                <p:overlayPanel id="factory_info" widgetVar="factoryOP" showEffect="fade" dismissable="true" showCloseIcon="true">
+                    <p:outputPanel id="factory_info_panel">
+                        <p:panelGrid columns="2">
+                            <p:outputLabel value="#{i18n_txts.lbl_factory_type}: " />
+                            <p:outputLabel value="#{I18nTextUtil.get(SetupBean.factory.description)}" />
+                            <p:outputLabel value="#{i18n_txts.lbl_building_costs} " />
+                            <p:outputLabel value="#{SetupBean.factory.buildingCosts}">
+                                <f:convertNumber groupingUsed="true" maxFractionDigits="2" type="currency" currencyCode="EUR" />
+                            </p:outputLabel>
+                            <p:outputLabel value="#{i18n_txts.lbl_overhead_per_month}: " />
+                            <p:outputLabel value="#{SetupBean.factory.overhead}">
+                                <f:convertNumber groupingUsed="true" maxFractionDigits="2" type="currency" currencyCode="EUR" />
+                            </p:outputLabel>
+                            <p:outputLabel value="#{i18n_txts.lbl_workforce_total}: " />
+                            <h:panelGroup layout="block">
+                                <p:outputLabel value="#{SetupBean.factory.coreWorkforce}" />
+                                <p:outputLabel value=" (#{i18n_txts.lbl_core_workforce})" />
+                                <br />
+                                <p:outputLabel value="#{SetupBean.factory.maxWorkforce - SetupBean.factory.coreWorkforce}" />
+                                <p:outputLabel value=" (#{i18n_txts.lbl_daywage_man})" />
+                            </h:panelGroup>
+                        </p:panelGrid>
+                    </p:outputPanel>
+                </p:overlayPanel>
+
+                <p:overlayPanel id="final_product_info" widgetVar="finalProductOP" showEffect="fade" dismissable="true" showCloseIcon="true">
+                    <p:outputPanel id="final_product_info_panel">
+                        <p:panelGrid columns="2">
+                            <p:outputLabel value="#{i18n_txts.lbl_product}: " />
+                            <p:outputLabel value="#{I18nTextUtil.get(SetupBean.finalProduct.description)}" />
+                            <p:outputLabel value="#{i18n_txts.lbl_base_retail_price}: " />
+                            <p:outputLabel value="#{SetupBean.finalProduct.baseRetailPrice}">
+                                <f:convertNumber groupingUsed="true" maxFractionDigits="2" type="currency" currencyCode="EUR" />
+                            </p:outputLabel>
+                            <p:outputLabel value="#{i18n_txts.lbl_parts_list}: " />
+                            <h:dataTable cellpadding="0" cellspacing="0"  value="#{SetupBean.finalProduct.partsList.parts}" var="part">
+
+                                <h:column>
+                                    <h:panelGrid columns="2">
+                                        <p:outputLabel value="#{I18nTextUtil.get(part.intermediateProduct.description)}" />
+                                    </h:panelGrid>
+                                </h:column>
+                                <h:column>
+                                    <h:panelGrid columns="2">
+                                        <p:outputLabel value="#{part.quantity}" />
+                                    </h:panelGrid>
+                                </h:column>
+                                <h:column>
+                                    <h:panelGrid columns="2">
+                                        <p:outputLabel value="#{part.intermediateProduct.basePurchasePrice}" />
+                                    </h:panelGrid>
+                                </h:column>
+                            </h:dataTable>
+                            <p:outputLabel value="#{i18n_txts.lbl_working_hours_per_unit}: " />
+                            <p:outputLabel value="#{SetupBean.finalProduct.requiredWorkingTime}" />
+                        </p:panelGrid>
+                    </p:outputPanel>
+                </p:overlayPanel>
+
+            </h:form>
+
+        </ui:define>
+    </ui:composition>
+</html>
+

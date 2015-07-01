@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+    <ui:composition template="./../resources/templates/hub.xhtml">
+
+        <ui:define name="stylesheets">
+            <h:outputStylesheet name="game/default.css" library="css" />
+        </ui:define>
+        <ui:define name="title">CES-Game - #{i18n_txts.loc_game_join}</ui:define>
+        <ui:define name="bread_crumbs"></ui:define>
+        <ui:define name="content_header"><h:form><p:menu binding="#{NavigationBar.menu}" /></h:form></ui:define>
+
+        <f:metadata>
+            <f:viewParam name="game-id" value="#{JoinBean.gameId}"/>
+        </f:metadata>
+
+        <ui:define name="content">
+            <h:form>
+                <h:panelGrid columns="2">
+                    <p:outputLabel for="game" value="#{i18n_txts.lbl_game}: "/>
+                    <p:selectOneMenu id="game" value="#{JoinBean.game}" converter="omnifaces.SelectItemsConverter">
+                        <f:selectItem itemLabel="#{i18n_txts.lbl_please_choose}" itemDisabled="true"/>
+                        <f:selectItems value="#{JoinBean.games}" var="game" itemLabel="#{game.identifier}" itemValue="#{game}" />
+                        <p:ajax event="change" update="@form" process="@this" listener="#{JoinBean.selectGame()}" oncomplete="console.log('game selected');" />
+                    </p:selectOneMenu>
+                    <p:outputLabel for="company" value="#{i18n_txts.lbl_company}: " rendered="#{not empty JoinBean.game}"/>
+                    <h:panelGrid columns="4" rendered="#{not empty JoinBean.game}">
+                        <p:selectOneMenu id="company" value="#{JoinBean.company}" converter="omnifaces.SelectItemsConverter">
+                            <f:selectItem itemLabel="#{i18n_txts.lbl_please_choose}" itemDisabled="true"/>
+                            <f:selectItems value="#{JoinBean.game.economy.companies}" var="company" itemLabel="#{company.identifier}" itemValue="#{company}"  />
+                            <p:ajax event="change" update="@form" listener="#{JoinBean.selectCompany()}" />
+                        </p:selectOneMenu>
+                        <p:message for="company" />
+                        <p:commandButton value="#{i18n_txts.btn_join}" rendered="#{not empty JoinBean.company and empty JoinBean.cooperator}" action="#{JoinBean.joinCompany()}" process="@this" update="@form" />
+                        <p:commandButton value="#{i18n_txts.btn_leave}" rendered="#{not empty JoinBean.company and not empty JoinBean.cooperator}" action="#{JoinBean.leaveCompany()}" process="@this" update="@form" />
+                    </h:panelGrid>
+                    <p:outputLabel value="#{i18n_txts.lbl_roles}: " rendered="#{not empty JoinBean.cooperator}" />
+                    <p:selectManyButton value="#{JoinBean.cooperator.roles}" rendered="#{not empty JoinBean.cooperator}" styleClass="btn_cooperator_type" converter="roleConverter">
+                        <f:selectItems value="#{JoinBean.roles}" var="role" itemLabel="#{i18n_txts[role.roleName]}" itemValue="#{role}" />
+                        <p:ajax event="change" update="@form" listener="#{JoinBean.updateCooperatorRoles()}" />
+                    </p:selectManyButton>
+                </h:panelGrid>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+</html>
+

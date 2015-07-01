@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+    <ui:composition template="./resources/templates/hub.xhtml">
+
+        <ui:define name="stylesheets">
+
+        </ui:define>
+        <ui:define name="title">CES-Game - #{i18n_txts.loc_register}</ui:define>
+        <ui:define name="content_header"><p:menu binding="#{NavigationBar.menu}" /></ui:define>
+        <ui:define name="content">
+            <h:form>
+                <h:panelGrid id="grid_user" columns="3" cellpadding="5">
+                    <!-- set username -->
+                    <p:outputLabel for="username" value="#{i18n_txts.lbl_username}:" />
+                    <p:inputText id="username" value="#{RegistrationBean.user.clientname}" label="#{i18n_txts.lbl_username}" title="#{i18n_txts.lbl_username}" required="true" binding="#{RegistrationBean.username}" />
+                    <p:message for="username" />
+                    <!-- set password -->
+                    <p:outputLabel for="pwd1" value="#{i18n_txts.lbl_password}:" />
+                    <p:password id="pwd1" value="#{RegistrationBean.user.password}" match="pwd2" label="#{i18n_txts.lbl_password}" title="#{i18n_txts.lbl_password}" required="true" />
+                    <p:message for="pwd1"  />
+                    <p:outputLabel for="pwd2" value="#{i18n_txts.lbl_password_repeat}:" />
+                    <p:password id="pwd2" value="#{RegistrationBean.user.password}" label="#{i18n_txts.lbl_password_repeat}" title="#{i18n_txts.lbl_password_repeat}" required="true" />
+                    <p:message for="pwd2" />
+                </h:panelGrid>
+
+                <!-- register user -->
+                <h:panelGrid columns="2" style="margin-bottom: 10px">
+                    <p:commandButton action="#{RegistrationBean.register()}" value="#{i18n_txts.btn_register}" label="#{i18n_txts.btn_register}" title="#{i18n_txts.btn_register}" type="submit" update="grid_user" />
+                    <p:commandButton value="#{i18n_txts.btn_reset}" label="#{i18n_txts.btn_reset}" title="#{i18n_txts.btn_reset}" immediate="true" ajax="false" style="margin-right:20px;">
+                        <p:resetInput target="@form" />
+                    </p:commandButton>
+                </h:panelGrid>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+</html>
+

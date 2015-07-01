@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:component     xmlns="http://www.w3.org/1999/xhtml"
+                  xmlns:f="http://java.sun.com/jsf/core"
+                  xmlns:h="http://java.sun.com/jsf/html"
+                  xmlns:ui="http://java.sun.com/jsf/facelets"
+                  xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+                  xmlns:p="http://primefaces.org/ui" id="BalancePanelComponent">
+
+    <cc:interface componentType="BalancePanelComponent" id="BalancePanelComponent" name="BalancePanelComponent">
+        <cc:attribute name="balance" type="de.hub.cses.ces.entity.company.accounting.Balance" required="true" />
+    </cc:interface>
+
+    <cc:implementation>
+        <div id="#{cc.clientId}">
+            <p:dataTable var="transaction" value="#{cc.balanceTransactions}" scrollable="true" scrollHeight="110" scrollRows="1">
+                <p:column headerText="#{i18n_txts.lbl_purpose}" style="text-align:left;">
+                    <h:outputText value="#{i18n_txts[transaction.getClass().simpleName]} " />
+                    <p:commandLink styleClass="fa fa-search" process="@this" update=":#{cc.clientId}:transactionDetail" oncomplete="PF('transactionOP').show('#{component.clientId}')" title="View" rendered="#{transaction['class'].simpleName eq 'Disposal' or transaction['class'].simpleName eq 'Purchase'}">
+                        <f:setPropertyActionListener value="#{transaction}" target="#{cc.transaction}" />
+                    </p:commandLink>
+                </p:column>
+
+                <p:column headerText="#{i18n_txts.lbl_booking_date}" style="text-align:center;">
+                    <p:outputLabel value="#{transaction.posted}">
+                        <f:convertDateTime pattern="#{i18n_txts.date_pattern}" timeZone="#{CalendarUtil.timeZoneIdentifier}" />
+                    </p:outputLabel>
+                </p:column>
+
+                <p:column headerText="#{i18n_txts.lbl_expense}" style="text-align:right;">
+                    <p:outputLabel rendered="#{transaction.amountPosted lt 0}" value="#{-transaction.amountPosted}" styleClass="transaction_amount transaction_expense">
+                        <f:convertNumber groupingUsed="true" maxFractionDigits="2" type="currency" currencyCode="EUR" />
+                    </p:outputLabel>
+                </p:column>
+
+                <p:column headerText="#{i18n_txts.lbl_revenue}" style="text-align:right;">
+                    <p:outputLabel rendered="#{transaction.amountPosted ge 0}" value="#{transaction.amountPosted}" styleClass="transaction_amount transaction_revenue">
+                        <f:convertNumber groupingUsed="true" maxFractionDigits="2" type="currency" currencyCode="EUR" />
+                    </p:outputLabel>
+                </p:column>
+                <f:facet name="footer">
+                    <p:outputLabel value="#{i18n_txts.lbl_account_balance}: " />
+                    <p:outputLabel value="#{cc.attrs.balance.amount}">
+                        <f:convertNumber groupingUsed="true" maxFractionDigits="2" type="currency" currencyCode="EUR" />
+                    </p:outputLabel>
+                </f:facet>
+            </p:dataTable>
+
+
+            <p:overlayPanel id="transactionOverlayPanel" widgetVar="transactionOP" showEffect="fade" dismissable="true" showCloseIcon="true">
+                <p:outputPanel id="transactionDetail">
+                    <h:panelGrid  columns="2" cellspacing="10px">
+                        <p:outputLabel value="#{i18n_txts.lbl_product}: " /><p:outputLabel value="#{I18nTextUtil.get(cc.productDescription)}" />
+                        <p:outputLabel value="#{i18n_txts.lbl_quantity}: " />
+                        <p:outputLabel value="#{cc.transaction.quantity}">
+                            <f:convertNumber integerOnly="true"/>
+                        </p:outputLabel>
+                        <p:outputLabel value="#{i18n_txts.lbl_price_per_unit}: " /><p:outputLabel value="#{cc.transaction.pricePerUnit}">
+                            <f:convertNumber groupingUsed="true" maxFractionDigits="2" type="currency" currencyCode="EUR" />
+                        </p:outputLabel>
+                    </h:panelGrid>
+                </p:outputPanel>
+            </p:overlayPanel>
+
+        </div>
+    </cc:implementation>
+
+</ui:component>
