@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:component  xmlns="http://www.w3.org/1999/xhtml"
+               xmlns:f="http://java.sun.com/jsf/core"
+               xmlns:h="http://java.sun.com/jsf/html"
+               xmlns:ui="http://java.sun.com/jsf/facelets"
+               xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+               xmlns:p="http://primefaces.org/ui" id="StocksPanelComponent">
+
+    <cc:interface componentType="StocksPanelComponent" id="StocksPanelComponent" name="StocksPanelComponent">
+        <cc:attribute name="warehouse" type="de.hub.cses.ces.entity.company.warehouse.Warehouse" required="true" />
+    </cc:interface>
+
+    <cc:implementation>
+        <div id="#{cc.clientId}">
+            <!--<h:outputLabel value="#{cc.stocks}" />-->
+            <p:dataGrid var="stock" value="#{cc.stocks}" columns="#{cc.stocks.size()}" layout="tabular" paginator="false" >
+
+                <p:panel header="#{I18nTextUtil.get(stock.product.description)}" style="text-align:center" styleClass="#{stock.product['class'].simpleName}">
+
+                    <f:facet name="actions">
+                        <p:commandLink styleClass="fa fa-search" process="@this" update=":#{cc.clientId}:stockDetailDialog" title="View" oncomplete="PF('stockDetailDialog').show();">
+                            <f:setPropertyActionListener value="#{stock}" target="#{cc.stock}" />
+                        </p:commandLink>
+                    </f:facet>
+
+                    <h:panelGrid columns="1" style="width:100%;">
+                        <p:outputLabel value="#{stock.quantity}">
+                            <f:convertNumber integerOnly="true" maxFractionDigits="0" />
+                        </p:outputLabel>
+                        <p:commandLink styleClass="fa fa-list" process="@this" update=":#{cc.clientId}:stockTransactionDialog" title="View" oncomplete="PF('stockTransactionDialog').show();">
+                            <f:setPropertyActionListener value="#{stock}" target="#{cc.stock}" />
+                        </p:commandLink>
+                    </h:panelGrid>
+                </p:panel>
+            </p:dataGrid>
+        </div>
+
+
+        <p:dialog appendTo="@(body)" id="stockDetailDialog" widgetVar="stockDetailDialog" resizable="false" closeOnEscape="true" >
+            <!--<p:ajax event="close" listener="#{StocksPanel.closeDetailDialog()}" />-->
+            <h:panelGrid id="stockDetailGrid" columns="2" cellspacing="10px">
+                <p:outputLabel value="#{i18n_txts.lbl_warehouse_charges_per_unit_per_day}: " />
+                <p:outputLabel value="#{cc.stock.product.warehouseCharges}">
+                    <f:convertNumber groupingUsed="true" maxFractionDigits="2" type="currency" currencyCode="EUR" />
+                </p:outputLabel>
+                <p:outputLabel value="#{i18n_txts.lbl_quantity_in_stock}: " />
+                <p:outputLabel value="#{cc.stock.quantity}">
+                    <f:convertNumber integerOnly="true" maxFractionDigits="0" />
+                </p:outputLabel>
+                <p:outputLabel value="#{i18n_txts.lbl_overall_warehouse_charges_per_day}: " />
+                <p:outputLabel value="#{cc.overallWarehouseCharges}">
+                    <f:convertNumber groupingUsed="true" maxFractionDigits="2" type="currency" currencyCode="EUR" />
+                </p:outputLabel>
+            </h:panelGrid>
+        </p:dialog>
+
+        <p:dialog appendTo="@(body)" id="stockTransactionDialog" widgetVar="stockTransactionDialog" resizable="false" closeOnEscape="true" >
+            <!--<p:ajax event="close" listener="#{StocksPanel.closeTransactionDialog()}" />-->
+            <p:dataTable style="width:450px" id="stockTransactionList" value="#{cc.stockTransactions}" var="stockTransaction" scrollable="true" scrollHeight="110" scrollRows="1">
+                <p:column headerText="#{i18n_txts.lbl_booking_date}" style="text-align:left;">
+                    <p:outputLabel value="#{stockTransaction.posted}">
+                        <f:convertDateTime pattern="#{i18n_txts.date_pattern}" timeZone="#{CalendarUtil.timeZoneIdentifier}" />
+                    </p:outputLabel>
+                </p:column>
+                <p:column headerText="#{i18n_txts.lbl_booking_value}" style="text-align:center;">
+                    <p:outputLabel value="#{stockTransaction.amountPosted}">
+                        <f:convertNumber integerOnly="true" />
+                    </p:outputLabel>
+                </p:column>
+            </p:dataTable>
+        </p:dialog>
+
+
+
+
+    </cc:implementation>
+
+</ui:component>

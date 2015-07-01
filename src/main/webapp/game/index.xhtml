@@ -1,0 +1,71 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+    <ui:composition template="./../resources/templates/hub.xhtml">
+
+        <ui:define name="stylesheets">
+            <h:outputStylesheet name="game/default.css" library="css" />
+        </ui:define>
+        <ui:define name="title">CES-Game - #{i18n_txts.loc_game_index}</ui:define>
+        <ui:define name="bread_crumbs"></ui:define>
+        <ui:define name="content_header"><h:form><p:menu binding="#{NavigationBar.menu}" /></h:form></ui:define>
+
+        <ui:define name="content">
+            <h:form id="form">
+                <p:dataTable value="#{GameIndexBean.games}" var="game">
+
+                    <p:column width="30%" headerText="#{i18n_txts.lbl_game_name}">#{game.identifier}</p:column>
+                    <p:column width="20%" headerText="#{i18n_txts.lbl_status}">#{i18n_txts[game.gameStatus.value]}</p:column>
+                    <p:column width="40%" headerText="#{i18n_txts.lbl_competitors}">
+                        <ui:repeat value="#{game.economy.companies.toArray()}" var="company">
+                            <p:outputLabel value="#{company.identifier}" />
+                            <h:panelGroup>
+                                <ui:repeat value="#{company.cooperators.toArray()}" var="cooperator">
+                                    <p:panelGrid columns="2">
+                                        <h:panelGroup layout="block">
+                                            <p:outputLabel value="#{cooperator.user.clientname} " />
+                                            <p:link outcome="/game/play" styleClass="fa fa-forward" rendered="#{(game.gameStatus eq 'PAUSED' or game.gameStatus eq 'RUNNING') and (GameIndexBean.isCooperator(cooperator.user.id))}">
+                                                <f:param name="game-id" value="#{game.id}" />
+                                                <f:param name="cooperator-id" value="#{cooperator.id}" />
+                                            </p:link>
+                                        </h:panelGroup>
+                                        <h:panelGroup layout="block">
+                                            <ui:repeat value="#{cooperator.roles.toArray()}" var="role" varStatus="i">
+                                                <p:outputLabel value="#{i18n_txts[role.roleName]}" /><br />
+                                            </ui:repeat>
+                                        </h:panelGroup>
+
+
+
+                                    </p:panelGrid>
+                                </ui:repeat>
+                            </h:panelGroup>
+                        </ui:repeat>
+                    </p:column>
+
+                    <p:column width="10%" style="text-align:center;">
+                        <p:panelGrid columns="3">
+                            <p:link outcome="/game/setup" styleClass="fa fa-gear" title="#{i18n_txts.link_setup_game}" rendered="#{game.gameStatus eq 'INITIALIZED'}">
+                                <f:param name="game-id" value="#{game.id}" />
+                            </p:link>
+                            <p:link outcome="/game/join" styleClass="fa fa-step-forward" title="#{i18n_txts.link_join_game}" rendered="#{game.gameStatus eq 'INITIALIZED'}">
+                                <f:param name="game-id" value="#{game.id}" />
+                            </p:link>
+                            <p:link outcome="/game/control" styleClass="fa fa-cogs" title="#{i18n_txts.link_control_game}" rendered="#{game.gameStatus ne 'ABORTED' and game.gameStatus ne 'TERMINATED'}">
+                                <f:param name="game-id" value="#{game.id}" />
+                            </p:link>
+                        </p:panelGrid>
+
+                    </p:column>
+
+                </p:dataTable>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+</html>
+
+

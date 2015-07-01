@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:component  xmlns="http://www.w3.org/1999/xhtml"
+               xmlns:f="http://java.sun.com/jsf/core"
+               xmlns:h="http://java.sun.com/jsf/html"
+               xmlns:ui="http://java.sun.com/jsf/facelets"
+               xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+               xmlns:p="http://primefaces.org/ui">
+
+    <cc:interface componentType="CompanyPanelComponent">
+        <cc:attribute name="company" type="de.hub.cses.ces.entity.company.Company" required="true" />
+        <cc:attribute name="style" type="java.lang.String" />
+    </cc:interface>
+
+    <cc:implementation>
+
+        <div id="#{cc.clientId}">
+            <h:panelGroup layout="block" style="#{cc.attrs.style}" >
+                <p:panel header="#{i18n_txts.lbl_company}" toggleable="true">
+                    <p:panelGrid columns="2" style="width:100%;">
+                        <p:outputLabel value="#{i18n_txts.lbl_company_name}: " />
+                        <p:outputLabel value="#{cc.attrs.company.identifier}" />
+                        <p:outputLabel value="#{i18n_txts.lbl_market}: " />
+                        <p:outputLabel value="#{I18nTextUtil.get(cc.attrs.company.economy.market.description)}" />
+                        <p:outputLabel value="#{i18n_txts.lbl_sector}: " />
+                        <p:outputLabel value="#{I18nTextUtil.get(cc.attrs.company.sector.description)}" />
+                        <p:outputLabel value="#{i18n_txts.lbl_cooperators}: " />
+                        <h:panelGroup layout="block">
+                            <ui:repeat value="#{cc.attrs.company.cooperators.toArray()}" var="cooperator">
+                                <p:outputLabel value="#{cooperator.user.clientname} " />
+                                <p:commandLink styleClass="fa fa-search" process="@this" update=":#{cc.clientId}:cooperatorDetail" oncomplete="PF('cooperatorOP').show('#{component.clientId}')" title="View">
+                                    <f:setPropertyActionListener value="#{cooperator}" target="#{cc.cooperator}" />
+                                </p:commandLink>
+                                <br />
+                            </ui:repeat>
+                        </h:panelGroup>
+                    </p:panelGrid>
+                </p:panel>
+                <p:panel header="#{i18n_txts.lbl_factory}" toggleable="true">
+                    <p:panelGrid columns="2" style="width:100%;">
+                        <p:outputLabel value="#{i18n_txts.lbl_factory_type}: " />
+                        <p:outputLabel value="#{I18nTextUtil.get(cc.attrs.company.factory.description)}" />
+                        <p:outputLabel value="#{i18n_txts.lbl_overhead_per_month}: " />
+                        <p:outputLabel value="#{cc.attrs.company.factory.overhead}">
+                            <f:convertNumber groupingUsed="true" maxFractionDigits="2" type="currency" currencyCode="EUR" />
+                        </p:outputLabel>
+                        <p:outputLabel value="#{i18n_txts.lbl_workforce_total}: " />
+                        <h:panelGroup layout="block">
+                            <p:outputLabel value="#{cc.attrs.company.factory.coreWorkforce}" />
+                            <p:outputLabel value=" (#{i18n_txts.lbl_core_workforce})" />
+                            <br />
+                            <p:outputLabel value="#{cc.attrs.company.factory.maxWorkforce - cc.attrs.company.factory.coreWorkforce}" />
+                            <p:outputLabel value=" (#{i18n_txts.lbl_daywage_man})" />
+                        </h:panelGroup>
+                        <p:outputLabel value="#{i18n_txts.lbl_producible_products}: " />
+                        <ui:repeat value="#{cc.attrs.company.production.productionPlans.toArray()}" var="productionPlan">
+                            <p:outputLabel value="#{I18nTextUtil.get(productionPlan.finalProduct.description)} " />
+                            <p:commandLink styleClass="fa fa-search" process="@this" update=":#{cc.clientId}:productDetail" oncomplete="PF('productOP').show('#{component.clientId}')" title="View">
+                                <f:setPropertyActionListener value="#{productionPlan.finalProduct}" target="#{cc.product}" />
+                            </p:commandLink>
+                            <br />
+                        </ui:repeat>
+                    </p:panelGrid>
+                </p:panel>
+                <p:panel header="#{i18n_txts.lbl_competitors}" toggleable="true">
+                    <ui:repeat value="#{cc.attrs.competitors.toArray()}" var="competitor">
+                        <p:outputLabel value="#{competitor.identifier} " />
+                        <p:commandLink styleClass="fa fa-search" process="@this" update=":#{cc.clientId}:competitorDetail" oncomplete="PF('competitorOP').show('#{component.clientId}')" title="View">
+                            <f:setPropertyActionListener value="#{competitor}" target="#{cc.competitor}" />
+                        </p:commandLink>
+                        <br />
+                    </ui:repeat>
+                </p:panel>
+            </h:panelGroup>
+
+
+            <p:overlayPanel id="productOverlayPanel" widgetVar="productOP" showEffect="fade" dismissable="true" showCloseIcon="true">
+                <p:outputPanel id="productDetail">
+                    <h:panelGroup layout="block">
+                        <p:dataTable value="#{cc.parts}" var="part" style="width: 300px">
+                            <f:facet name="header">#{i18n_txts.lbl_parts_list}</f:facet>
+                            <p:column headerText="#{i18n_txts.lbl_intermediate_product}" style="text-align:left">
+                                <p:outputLabel value="#{I18nTextUtil.get(part.intermediateProduct.description)}" />
+                            </p:column>
+                            <p:column headerText="#{i18n_txts.lbl_quantity}" style="text-align:center">
+                                <p:outputLabel value="#{part.quantity}">
+                                    <f:convertNumber integerOnly="true" />
+                                </p:outputLabel>
+                            </p:column>
+                        </p:dataTable>
+                        <h:panelGroup>
+                            <p:outputLabel value="#{i18n_txts.lbl_working_hours_per_unit}: " />
+                            <p:outputLabel value="#{cc.product.requiredWorkingTime}">
+                                <f:convertNumber integerOnly="true" />
+                            </p:outputLabel>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                </p:outputPanel>
+            </p:overlayPanel>
+
+            <p:overlayPanel id="cooperatorOverlayPanel" widgetVar="cooperatorOP" showEffect="fade" dismissable="true" showCloseIcon="true">
+                <p:outputPanel id="cooperatorDetail">
+                    <ui:repeat value="#{cc.cooperator.roles.toArray()}" var="role">
+                        <p:outputLabel value="#{i18n_txts[role.roleName]}" />
+                        <br />
+                    </ui:repeat>
+                </p:outputPanel>
+            </p:overlayPanel>
+
+            <p:overlayPanel id="competitorOverlayPanel" widgetVar="competitorOP" showEffect="fade" dismissable="true" showCloseIcon="true">
+                <p:outputPanel id="competitorDetail">
+                    <p:panelGrid columns="2" style="width:100%;">
+                        <p:outputLabel value="#{i18n_txts.lbl_sector}: " />
+                        <p:outputLabel value="#{I18nTextUtil.get(cc.competitor.sector.description)}" />
+                        <p:outputLabel value="#{i18n_txts.lbl_factory_type}: " />
+                        <p:outputLabel value="#{I18nTextUtil.get(cc.competitor.factory.description)}" />
+                        <p:outputLabel value="#{i18n_txts.lbl_producible_products}: " />
+                        <h:panelGroup layout="block">
+                            <ui:repeat value="#{cc.competitor.production.productionPlans.toArray()}" var="productionPlan">
+                                <p:outputLabel value="#{I18nTextUtil.get(productionPlan.finalProduct.description)}" />
+                                <br />
+                            </ui:repeat>
+                        </h:panelGroup>
+                        <p:outputLabel value="#{i18n_txts.lbl_cooperators}: " />
+                        <h:panelGroup layout="block">
+                            <ui:repeat value="#{cc.competitor.cooperators.toArray()}" var="cooperator">
+                                <p:outputLabel value="#{cooperator.user.clientname}" />
+                                <br />
+                            </ui:repeat>
+                        </h:panelGroup>
+                    </p:panelGrid>
+                </p:outputPanel>
+            </p:overlayPanel>
+        </div>
+
+    </cc:implementation>
+
+</ui:component>

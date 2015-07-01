@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+    <ui:composition template="./../resources/templates/hub.xhtml">
+
+        <ui:define name="stylesheets">
+            <h:outputStylesheet name="game/default.css" library="css" />
+        </ui:define>
+        <ui:define name="title">CES-Game - #{i18n_txts.loc_game_control}</ui:define>
+        <ui:define name="bread_crumbs"></ui:define>
+        <ui:define name="content_header"><h:form><p:menu binding="#{NavigationBar.menu}" /></h:form></ui:define>
+
+        <f:metadata>
+            <f:viewParam name="game-id" value="#{ControlBean.gameId}"/>
+        </f:metadata>
+
+        <ui:define name="content">
+            <h:form id="form">
+                <!-- choose game -->
+                <h:panelGrid columns="3" style="margin-bottom:10px" cellpadding="5">
+                    <p:outputLabel for="game" value="#{i18n_txts.lbl_game}: "/>
+                    <p:selectOneMenu id="game" value="#{ControlBean.selectedGame}" converter="omnifaces.SelectItemsConverter">
+                        <f:selectItem itemLabel="#{i18n_txts.lbl_please_choose}" itemDisabled="true"/>
+                        <f:selectItems value="#{ControlBean.games}" var="game" itemValue="#{game}" itemLabel="#{game.identifier}" />
+                        <p:ajax event="change" process="@this" update="@form" />
+                    </p:selectOneMenu>
+                    <p:message for="game" />
+                </h:panelGrid>
+                <h:panelGroup id="selectedGame" rendered="#{not empty ControlBean.selectedGame}">
+                    <h:panelGrid>
+                        <h:panelGrid columns="4">
+                            <p:commandButton value="#{i18n_txts.btn_start}" title="#{i18n_txts.btn_initialize}" actionListener="#{ControlBean.startGame()}" disabled="#{not (ControlBean.selectedGame.gameStatus == 'INITIALIZED')}" update="@form" process="@this" />
+                            <p:commandButton value="#{i18n_txts.btn_pause}" title="#{i18n_txts.btn_pause}" actionListener="#{ControlBean.pauseGame()}" disabled="#{not (ControlBean.selectedGame.gameStatus == 'RUNNING')}" update="@form" process="@this" />
+                            <p:commandButton value="#{i18n_txts.btn_continue}" title="#{i18n_txts.btn_continue}" actionListener="#{ControlBean.continueGame()}" disabled="#{not (ControlBean.selectedGame.gameStatus == 'PAUSED')}" update="@form" process="@this" />
+                            <p:commandButton value="#{i18n_txts.btn_terminate}" title="#{i18n_txts.btn_terminate}" actionListener="#{ControlBean.terminateGame()}" disabled="#{not (ControlBean.selectedGame.gameStatus == 'PAUSED')}" update="@form" process="@this" />
+                        </h:panelGrid>
+                    </h:panelGrid>
+                </h:panelGroup>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+</html>
+
