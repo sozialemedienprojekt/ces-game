@@ -1,0 +1,118 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ces="http://xmlns.jcp.org/jsf/composite/components/game"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+    <ui:composition template="./../resources/templates/hub.xhtml">
+
+        <ui:define name="scripts">
+            <h:outputScript name="websocket/WebSocketClient.js" library="javascript" />
+            <h:outputScript name="restful/RestfulWebServiceClient.js" library="javascript" />
+            <h:outputScript name="game/play.js" library="javascript" />
+            <h:outputScript name="game/chat.js" library="javascript" />
+            <h:outputScript name="primefaces/locales.js" library="javascript" />
+        </ui:define>
+        <ui:define name="stylesheets">
+            <h:outputStylesheet name="game/default.css" library="css" />
+            <h:outputStylesheet name="game/play.css" library="css" />
+        </ui:define>
+        <ui:define name="title">CES-Game - #{i18n_txts.loc_game_play}</ui:define>
+        <ui:define name="bread_crumbs"></ui:define>
+        <ui:define name="content_header"><h:form><p:menu binding="#{NavigationBar.menu}" /></h:form></ui:define>
+
+        <f:metadata>
+            <f:viewParam name="game-id" value="#{PlayBean.gameId}"/>
+            <f:viewParam name="cooperator-id" value="#{PlayBean.cooperatorId}"/>
+            <f:event type="preRenderView" listener="#{PlayBean.check()}" />
+        </f:metadata>
+
+        <ui:define name="content">
+            <p:outputPanel id="panel">
+                <h:form id="form1">
+                    <p:calendar id="#{JSFConfig.dateComponentId}" pattern="#{i18n_txts.calendar_pattern}" value="#{PlayBean.currentDate}" mode="inline" readonly="true" styleClass="date" readonlyInput="true" yearRange="c-0:c+1" style="width:22%;float:left;"/>
+                    <h:panelGroup layout="block" style="margin-left:1%;width:39%;float:left;">
+
+                        <ces:companyPanel company="#{PlayBean.company}" competitors="#{PlayBean.competitors}" style="width:100%" />
+                    </h:panelGroup>
+                    <h:panelGroup style="margin-left:1%;width:37%;float:left;">
+
+                        <ces:notificationPanel notifications="#{PlayBean.notifications}" id="#{JSFConfig.notificationComponentId}" style="width:100%;" />
+                    </h:panelGroup>
+                    <p:remoteCommand process="@this" update="#{JSFConfig.notificationComponentId}" name="update_notification" id="notification_updater" onsuccess="console.log('notification updated');" />
+                    <p:remoteCommand process="@this" update="#{JSFConfig.dateComponentId}" name="update_date" id="date_updater" onsuccess="console.log('date updated');" />
+                </h:form>
+
+                <h:panelGroup layout="block" style="clear:both" />
+
+                <h:form id="form2">
+                    <p:panel id="balance_panel" toggleable="true" header="#{i18n_txts.lbl_balance}" >
+                        <ces:balancePanel id="#{JSFConfig.balanceComponentId}" balance="#{PlayBean.balance}" />
+                    </p:panel>
+                    <p:remoteCommand process="@this" update="#{JSFConfig.balanceComponentId}" name="update_balance" id="balance_updater" onsuccess="console.log('balance updated');" />
+                </h:form>
+                <h:form id="form3">
+                    <p:panel id="stocks_panel" header="#{i18n_txts.lbl_stocks}" toggleable="true">
+                        <ces:stocksPanel id="#{JSFConfig.stocksComponentId}" warehouse="#{PlayBean.warehouse}" />
+                    </p:panel>
+                    <p:remoteCommand process="@this" update="#{JSFConfig.stocksComponentId}" name="update_stocks" id="stocks_updater" onsuccess="console.log('stocks updated');" />
+                </h:form>
+
+                <h:form id="form4">
+                    <p:tabView id="tabview" orientation="bottom" rendered="#{PlayBean.renderPurchaseTab() or PlayBean.renderProductionTab() or PlayBean.renderSellingTab() or PlayBean.renderMarketingTab()}">
+                        <p:tab title="#{i18n_txts.tab_purchase}" rendered="#{PlayBean.renderPurchaseTab()}">
+                            <ces:purchasePanel id="#{JSFConfig.purchaseComponentId}" supplies="#{PlayBean.supplies}" selectedSupply="#{PurchasePanel.supply}" quantity="#{PurchasePanel.quantity}" strictPrice="#{PurchasePanel.strictPrice}" strictQuantity="#{PurchasePanel.strictQuantity}" priceVariationIndicator="#{PurchasePanel.priceVariationIndicator}" quantityVariationIndicator="#{PurchasePanel.quantityVariationIndicator}" purchaseListener="#{PurchasePanel.purchase()}" cancelListener="#{PurchasePanel.cancel()}" changeListener="#{PurchasePanel.change}" />
+                        </p:tab>
+                        <p:tab title="#{i18n_txts.tab_production}" rendered="#{PlayBean.renderProductionTab()}">
+                            <ces:productionPanel id="#{JSFConfig.productionComponentId}" production="#{PlayBean.production}" factory="#{PlayBean.factory}" editListener="#{ProductionPanel.edit}" cancelListener="#{ProductionPanel.cancel}" />
+                        </p:tab>
+                        <p:tab title="#{i18n_txts.tab_sales}" rendered="#{PlayBean.renderSellingTab()}">
+                            <ces:disposalPanel id="#{JSFConfig.disposalComponentId}" demands="#{PlayBean.demands}" selectedDemand="#{DisposalPanel.demand}" quantity="#{DisposalPanel.quantity}" strictPrice="#{DisposalPanel.strictPrice}" priceVariationIndicator="#{DisposalPanel.priceVariationIndicator}" quantityVariationIndicator="#{DisposalPanel.quantityVariationIndicator}" strictQuantity="#{DisposalPanel.strictQuantity}" disposeListener="#{DisposalPanel.dispose()}" cancelListener="#{DisposalPanel.cancel()}"  changeListener="#{DisposalPanel.change()}" />
+                        </p:tab>
+                        <p:tab title="#{i18n_txts.tab_marketing}" rendered="#{PlayBean.renderMarketingTab()}">
+                            <ces:marketingPanel />
+                        </p:tab>
+                    </p:tabView>
+                    <p:remoteCommand process="@this" update="tabview:#{JSFConfig.disposalComponentId}" name="update_disposal" id="disposal_updater" onsuccess="console.log('disposal updated');" actionListener="#{DisposalPanel.update()}" />
+                    <p:remoteCommand process="@this" update="tabview:#{JSFConfig.purchaseComponentId}" name="update_purchase" id="purchase_updater" onsuccess="console.log('purchase updated');" actionListener="#{PurchasePanel.update()}" />
+                    <p:remoteCommand process="@this" update="tabview:#{JSFConfig.productionComponentId}" name="update_production" id="production_updater" onsuccess="console.log('production updated');" />
+
+                </h:form>
+
+                <h:form id="form5">
+                    <p:remoteCommand process="@this" update="@all" name="update_blockui" id="blockui_updater" onsuccess="console.log('block updated');" />
+                    <p:remoteCommand process="@this" update="@all" name="update_page" id="page_updater" onsuccess="console.log('page updated');" />
+                    <!-- -->
+                    <h:outputLabel style="display:none;" value="#{PlayBean.gameId}" id="gameid" />
+                    <h:outputLabel style="display:none;" value="#{PlayBean.company.id}" id="companyid" />
+                    <h:outputLabel style="display:none;" value="#{PlayBean.cooperatorId}" id="cooperatorid" />
+                    <h:outputLabel style="display:none;" value="#{PlayBean.cooperator.user.id}" id="clientid" />
+                    <h:outputLabel style="display:none;" value="#{JSFConfig.webSocketProtocol}" id="wsprotocol" />
+                    <h:outputLabel style="display:none;" value="#{JSFConfig.webSocketPath}" id="wspath" />
+                    <h:outputLabel style="display:none;" value="#{JSFConfig.contextPath}" id="contextpath" />
+                    <p:blockUI id="#{JSFConfig.blockUIComponentId}" widgetVar="blockUIWidget" blocked="#{not (PlayBean.gameStatus eq 'RUNNING')}" block="panel">
+                        <h:graphicImage library="images" name="game/ajax-loader1.gif"
+                                        style="margin-right: 12px; vertical-align: middle;"/>
+                        <p:outputLabel value="#{i18n_txts.lbl_status}: #{i18n_txts[PlayBean.gameStatus.value]}" />
+
+                    </p:blockUI>
+
+                </h:form>
+
+                <p:ajaxExceptionHandler type="javax.persistence.OptimisticLockException" update="exceptionDialog" onexception="PF('exceptionDialog').show();" />
+                <p:ajaxExceptionHandler type="de.hub.cses.ces.exception.TradingException" update="exceptionDialog" onexception="PF('exceptionDialog').show();" />
+                <p:ajaxExceptionHandler type="de.hub.cses.ces.exception.GameException" update="exceptionDialog" onexception="PF('exceptionDialog').show();" />
+                <p:ajaxExceptionHandler type="java.lang.NullPointerException" update="exceptionDialog" onexception="PF('exceptionDialog').show();" />
+
+                <p:dialog id="exceptionDialog" header="#{pfExceptionHandler.type}" widgetVar="exceptionDialog" width="500px">
+                    #{pfExceptionHandler.message}
+                </p:dialog>
+
+            </p:outputPanel>
+        </ui:define>
+    </ui:composition>
+</html>
+

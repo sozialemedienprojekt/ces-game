@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:component  xmlns="http://www.w3.org/1999/xhtml"
+               xmlns:f="http://java.sun.com/jsf/core"
+               xmlns:h="http://java.sun.com/jsf/html"
+               xmlns:ui="http://java.sun.com/jsf/facelets"
+               xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+               xmlns:p="http://primefaces.org/ui">
+
+    <cc:interface>
+        <cc:attribute name="notifications" type="java.util.Collection" required="true" />
+        <cc:attribute name="style" type="java.lang.String" />
+    </cc:interface>
+
+    <cc:implementation>
+
+        <div id="#{cc.clientId}" style="#{cc.attrs.style}">
+            <p:panel header="#{i18n_txts.lbl_notifications}" toggleable="true">
+                <p:dataList value="#{cc.attrs.notifications}" var="notification" type="ordered" paginator="false" itemType="none">
+                    <f:attribute name="filter" value="true" />
+                    <p:column>
+                        <h:outputText value="#{notification.type}, #{I18nTextUtil.get(notification.message)}" />
+                    </p:column>
+
+                </p:dataList>
+            </p:panel>
+
+        </div>
+
+    </cc:implementation>
+
+</ui:component>

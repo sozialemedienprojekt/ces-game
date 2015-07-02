@@ -1,0 +1,106 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+    <ui:composition template="./../resources/templates/hub.xhtml">
+
+        <ui:define name="stylesheets">
+            <h:outputStylesheet name="game/default.css" library="css" />
+        </ui:define>
+        <ui:define name="title">CES-Game - #{i18n_txts.loc_game_create}</ui:define>
+        <ui:define name="bread_crumbs"></ui:define>
+        <ui:define name="content_header"><h:form><p:menu binding="#{NavigationBar.menu}" /></h:form></ui:define>
+        <ui:define name="content">
+            <h:form id="form">
+                <p:panel header="Neues Spiel erstellen">
+                    <h:panelGrid columns="2">
+                        <!-- choose market -->
+                        <p:outputLabel for="market" value="#{i18n_txts.lbl_market}: " />
+                        <h:panelGrid columns="2" style="margin-bottom:10px" cellpadding="5">
+
+                            <p:selectOneMenu id="market" value="#{CreationBean.market}" required="true" converter="omnifaces.SelectItemsConverter">
+                                <f:selectItem itemLabel="#{i18n_txts.lbl_please_choose}" itemDisabled="true"/>
+                                <f:selectItems value="#{CreationBean.markets}" var="market" itemLabel="#{I18nTextUtil.get(market.description)}" itemValue="#{market}"  />
+                            </p:selectOneMenu>
+                            <p:message for="market" />
+                        </h:panelGrid>
+                        <!-- set game name -->
+                        <p:outputLabel for="game_name" value="#{i18n_txts.lbl_game_name}: " />
+                        <h:panelGrid columns="2">
+
+                            <p:inputText id="game_name" binding="#{CreationBean.identifier}" value="#{CreationBean.game.identifier}" required="true" title="#{i18n_txts.lbl_game_name}" label="#{i18n_txts.lbl_game_name}" />
+                            <p:message id="game_name_msg" for="game_name" />
+                        </h:panelGrid>
+                        <!-- set seed capital -->
+                        <p:outputLabel for="capital" value="#{i18n_txts.lbl_starting_capital}: " />
+                        <h:panelGrid columns="2">
+                            <h:panelGrid columns="1">
+                                <p:outputPanel id="capital_panel">
+                                    <p:outputLabel id="capital_label" value="#{CreationBean.game.seedCapital}">
+                                        <f:convertNumber groupingUsed="true" maxFractionDigits="2" type="currency" currencyCode="EUR" />
+                                    </p:outputLabel>
+                                    <h:inputHidden id="capital" value="#{CreationBean.game.seedCapital}" required="true" />
+                                    <p:slider for="capital" display="capital_label" style="margin-top:10px;width: 200px" minValue="1000000" maxValue="10000000" step="10000">
+                                        <p:ajax event="slideEnd" process="capital_panel" update="capital_panel" />
+                                    </p:slider>
+                                </p:outputPanel>
+                            </h:panelGrid>
+                            <p:message id="capital_msg" for="capital" />
+                        </h:panelGrid>
+                        <!-- set period of play -->
+                        <p:outputLabel for="startAt" value="#{i18n_txts.lbl_game_start_at}:" />
+                        <h:panelGrid columns="2" style="margin-bottom: 10px">
+
+                            <p:calendar id="startAt" value="#{CreationBean.game.startAt}" pattern="dd.MM.yyyy" required="true">
+                                <p:ajax event="dateSelect" update="stopAt" />
+                            </p:calendar>
+                            <p:message for="startAt" />
+                        </h:panelGrid>
+                        <p:outputLabel for="stopAt" value="#{i18n_txts.lbl_game_stop_at}:" />
+                        <h:panelGrid columns="2">
+
+                            <p:calendar id="stopAt" value="#{CreationBean.game.stopAt}" mindate="#{CreationBean.game.startAt}" pattern="dd.MM.yyyy" required="true">
+                                <f:validator validatorId="DateRangeValidator" />
+                            </p:calendar>
+
+                            <p:message for="stopAt" />
+                        </h:panelGrid>
+                        <!-- set timing -->
+                        <p:outputLabel for="timing" value="#{i18n_txts.lbl_timing}: " />
+                        <h:panelGrid columns="3" style="margin-bottom:10px" cellpadding="5">
+
+                            <p:selectOneMenu id="timing" value="#{CreationBean.game.gameTiming}" style="width:125px" required="true" converter="omnifaces.SelectItemsConverter">
+                                <f:selectItem itemLabel="#{i18n_txts.lbl_please_choose}" itemDisabled="true"/>
+                                <f:selectItems value="#{CreationBean.timings}" var="timing" itemLabel="#{timing.value}" itemValue="#{timing}"/>
+                            </p:selectOneMenu>
+                            <p:outputLabel value=" #{i18n_txts.lbl_seconds_per_day}" />
+                            <p:message for="timing" />
+                        </h:panelGrid>
+                        <!-- set password (if wanted) -->
+                        <p:outputLabel for="pwd1" value="#{i18n_txts.lbl_password}:" />
+                        <h:panelGrid columns="2" cellpadding="5">
+                            <p:password id="pwd1" value="#{CreationBean.game.password}" match="pwd2" label="#{i18n_txts.lbl_password}" required="false"  />
+                            <p:message for="pwd1"  />
+                        </h:panelGrid>
+
+                        <p:outputLabel for="pwd2" value="#{i18n_txts.lbl_password_repeat}:" />
+                        <h:panelGrid columns="2" cellpadding="5">
+
+                            <p:password id="pwd2" value="#{CreationBean.game.password}" label="#{i18n_txts.lbl_password_repeat}" required="false" />
+                            <p:message for="pwd2" />
+                        </h:panelGrid>
+                        <!-- create game -->
+                        <p:commandButton action="#{CreationBean.createGame()}" value="#{i18n_txts.btn_create}" type="submit" process="@form" update="@form" />
+                        <p:commandButton value="#{i18n_txts.btn_reset}" immediate="true" ajax="false" style="margin-right:20px;" actionListener="#{CreationBean.cancel}">
+                            <p:resetInput target="@form" />
+                        </p:commandButton>
+                    </h:panelGrid>
+                </p:panel>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+</html>
+

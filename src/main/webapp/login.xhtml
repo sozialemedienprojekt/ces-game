@@ -1,0 +1,57 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+    <ui:composition template="./resources/templates/hub.xhtml">
+
+        <ui:define name="stylesheets">
+
+        </ui:define>
+        <ui:define name="title">CES-Game - #{i18n_txts.loc_login}</ui:define>
+        <ui:define name="content_header"><p:menu binding="#{NavigationBar.menu}" /></ui:define>
+        <ui:define name="content">
+            <ui:fragment rendered="#{empty facesContext.externalContext.remoteUser}">
+                <form action="j_security_check" method="POST">
+                    <h:panelGrid columns="2">
+                        <p:outputLabel for="j_username" value="#{i18n_txts.lbl_username}: " />
+                        <p:inputText id="j_username" value="#{Authentication.username}" />
+                        <p:outputLabel for="j_password" value="#{i18n_txts.lbl_password}: " />
+                        <h:panelGroup layout="block">
+                            <p:password id="j_password" value="#{Authentication.password}" />
+                            <button class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" style="padding:4px;" id="submit2" type="submit" name="submit" value="submit" disabled="true" title="#{i18n_txts.btn_login}">#{i18n_txts.btn_login}</button>
+                            <button class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" style="padding:4px;" type="reset" name="reset" value="reset" title="#{i18n_txts.btn_reset}">#{i18n_txts.btn_reset}</button>
+                        </h:panelGroup>
+
+                    </h:panelGrid>
+
+
+                    <h:panelGrid columns="1" rendered="#{param['login-failed']}">
+                        <p:outputLabel styleClass="errormsg" value="#{i18n_txts.lbl_login_failed}." />
+                    </h:panelGrid>
+                </form>
+                <script type="text/javascript">
+                    var submit2 = document.getElementById("submit2");
+                    if (!("WebSocket" in window)) {
+                        document.write('<h2 style="color:rgb(153,0,0);">#{i18n_txts.msg_websocket_support}</h2>');
+                        submit2.disabled = true;
+                    } else {
+                        submit2.disabled = false;
+                    }
+                </script>
+            </ui:fragment>
+            <ui:fragment rendered="#{not empty facesContext.externalContext.remoteUser}">
+                <h:form id="logout2">
+                    <h:outputLabel value="#{i18n_txts.lbl_remote_user} " style="font-weight: bold;"/>
+                    <h:outputLabel id="remote_user_name" value="#{facesContext.externalContext.remoteUser} " />
+                    <h:commandLink action="#{Authentication.logout()}" style="vertical-align:bottom;">
+                        <h:graphicImage url="#{resource['images:hub/logout.svg']}" width="20px" height="20px" style="vertical-align:bottom;" />
+                    </h:commandLink>
+                </h:form>
+            </ui:fragment>
+        </ui:define>
+    </ui:composition>
+</html>
+

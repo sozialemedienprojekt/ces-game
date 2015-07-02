@@ -1,0 +1,56 @@
+.btn_cooperator_type div {
+    margin-left:10px !important;
+    border: 2px solid white;
+}
+
+.btn_cooperator_type .ui-state-hover {
+    border: 2px solid black !important;
+}
+
+.btn_cooperator_type .ui-state-active {
+    border: 2px solid rgb(0,55,108) !important;
+}
+
+.btn_cooperator_type div:first-child span {
+    background-image: url("#{resource['images/game/roles:shopping.svg']}") !important;
+    background-position: center bottom;
+    background-repeat: no-repeat;
+    background-size: 70% 70%;
+    margin: 0;
+    padding: 0;
+    width: 100px;
+    height: 100px;
+}
+
+.btn_cooperator_type div:nth-child(2) span {
+    background-image: url("#{resource['images/game/roles:factory.svg']}") !important;
+    background-position: center bottom;
+    background-repeat: no-repeat;
+    background-size: 70% 70%;
+    margin: 0;
+    padding: 0;
+    width: 100px;
+    height: 100px;
+}
+
+.btn_cooperator_type div:nth-child(3) span {
+    background-image: url("#{resource['images/game/roles:incomes.svg']}") !important;
+    background-position: center bottom;
+    background-repeat: no-repeat;
+    background-size: 70% 70%;
+    margin: 0;
+    padding: 0;
+    width: 100px;
+    height: 100px;
+}
+
+.btn_cooperator_type div:nth-child(4) span {
+    background-image: url("#{resource['images/game/roles:market.svg']}") !important;
+    background-position: center bottom;
+    background-repeat: no-repeat;
+    background-size:70% 70%;
+    margin: 0;
+    padding: 0;
+    width: 100px;
+    height: 100px;
+}

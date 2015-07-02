@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:component  xmlns="http://www.w3.org/1999/xhtml"
+               xmlns:f="http://java.sun.com/jsf/core"
+               xmlns:h="http://java.sun.com/jsf/html"
+               xmlns:ui="http://java.sun.com/jsf/facelets"
+               xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+               xmlns:p="http://primefaces.org/ui"
+               xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <cc:interface componentType="ProductionPanelComponent">
+        <cc:attribute name="factory" type="de.hub.cses.ces.entity.company.Factory" required="true" />
+        <cc:attribute name="production" required="true" />
+        <cc:attribute name="editListener" method-signature="void listener(org.primefaces.event.RowEditEvent)" />
+        <cc:attribute name="cancelListener" method-signature="void listener(org.primefaces.event.RowEditEvent)" />
+    </cc:interface>
+
+    <cc:implementation>
+        <div id="#{cc.clientId}" style="min-height:200px;">
+
+
+            <h:panelGroup layout="block" style="width:75%;float:left">
+
+                <p:dataTable id="table" var="plan" value="#{cc.attrs.production.productionPlans}" rowKey="#{plan.id}" editable="true" disabledSelection="true">
+
+                    <p:ajax event="rowSelect" process="@this" update="workforce_panel,producible_quantity" />
+                    <p:ajax event="rowEditInit" process="@this" update="workforce_panel,producible_quantity" />
+                    <c:if test="#{cc.getValueExpression('editListener') != null}">
+                        <p:ajax event="rowEdit" process="@this" listener="#{cc.attrs.editListener}" update="table,:#{cc.clientId}:info_panel" />
+                    </c:if>
+
+                    <c:if test="#{cc.getValueExpression('cancelListener') != null}">
+                        <p:ajax event="rowEditCancel" process="@this" listener="#{cc.attrs.cancelListener}" update="table,:#{cc.clientId}:info_panel" />
+                    </c:if>
+
+                    <f:facet name="header">
+                        <p:outputLabel value="#{i18n_txts.lbl_production_plans}" />
+                    </f:facet>
+
+                    <p:column headerText="#{i18n_txts.lbl_product}" style="text-align:left;">
+                        <p:outputLabel value="#{I18nTextUtil.get(plan.finalProduct.description)}" />
+                    </p:column>
+
+                    <p:column headerText="#{i18n_txts.lbl_workforce}" style="text-align:center;">
+                        <p:cellEditor>
+                            <f:facet name="output"><h:outputLabel value="#{plan.workforce}" /></f:facet>
+                            <f:facet name="input">
+                                <p:outputPanel id="workforce_panel" style="padding:10px;margin:10px">
+                                    <p:outputLabel id="workforce_label" value="#{plan.workforce}" />
+                                    <h:inputHidden id="workforce" value="#{plan.workforce}" />
+                                    <p:slider display="workforce_label" for=":#{cc.clientId}:table:workforce" minValue="0" maxValue="#{cc.maxWorkforce + plan.workforce}" style="margin-top:10px;">
+                                        <p:ajax event="slideEnd" process="workforce_panel" update="producible_quantity" listener="#{cc.onSlideEnd}" oncomplete="console.log('slide end');" />
+                                    </p:slider>
+                                    <p:message for="workforce" />
+                                </p:outputPanel>
+                            </f:facet>
+                        </p:cellEditor>
+                    </p:column>
+
+                    <p:column headerText="#{i18n_txts.lbl_producible_quantity_per_day}" style="text-align:center;">
+                        <p:outputPanel id="producible_quantity">
+                            <p:outputLabel value="#{cc.getProducibleQuantity(plan)}">
+                                <f:convertNumber maxFractionDigits="2" />
+                            </p:outputLabel>
+                        </p:outputPanel>
+                    </p:column>
+
+                    <p:column style="width:32px">
+                        <p:rowEditor />
+                    </p:column>
+                </p:dataTable>
+
+            </h:panelGroup>
+
+            <h:panelGroup layout="block" style="margin-left:1%;width:24%;float:left;">
+                <p:outputPanel id="info_panel">
+                    <p:panelGrid columns="2">
+                        <p:outputLabel value="#{i18n_txts.lbl_workforce_total}:" />
+                        <p:outputLabel value="#{cc.attrs.factory.maxWorkforce}" />
+                        <p:outputLabel value="#{i18n_txts.lbl_core_workforce}: " />
+                        <p:outputLabel value="#{cc.attrs.factory.coreWorkforce}" />
+                        <p:outputLabel value="#{i18n_txts.lbl_daywage_man}: " />
+                        <p:outputLabel value="#{cc.attrs.factory.maxWorkforce - cc.attrs.factory.coreWorkforce}" />
+                        <p:outputLabel value="#{i18n_txts.lbl_workforce_busy}: " />
+                        <p:outputLabel value="#{cc.numberOfBusyWorkforce}" />
+                        <p:outputLabel value="#{i18n_txts.lbl_core_workforce_idle}: " />
+                        <p:outputLabel value="#{cc.numberOfIdleCoreWorkforce}" />
+                    </p:panelGrid>
+                </p:outputPanel>
+            </h:panelGroup>
+
+            <h:panelGroup layout="block" style="clear:both;" />
+        </div>
+
+    </cc:implementation>
+
+</ui:component>

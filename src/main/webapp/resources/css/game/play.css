@@ -1,0 +1,30 @@
+.blue_panel {
+    padding:5px;
+    background-color:rgb(0,55,108)
+}
+
+.date .ui-state-active {
+    background-image: none !important;
+    background-color: rgba(210,192,103, 0.7) !important;
+    border: 1px solid rgb(0,55,108);
+}
+
+.IntermediateProduct {
+    background: rgba(189,202,211,0.5);
+}
+
+.FinalProduct {
+    background: rgba(210,192,103,0.5);
+}
+
+.transaction_amount {
+    font-weight: bold;
+}
+
+.transaction_expense {
+    color: red;
+}
+
+.transaction_revenue {
+    color: green;
+}

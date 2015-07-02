@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:component  xmlns="http://www.w3.org/1999/xhtml"
+               xmlns:f="http://java.sun.com/jsf/core"
+               xmlns:h="http://java.sun.com/jsf/html"
+               xmlns:ui="http://java.sun.com/jsf/facelets"
+               xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+               xmlns:p="http://primefaces.org/ui">
+
+    <cc:interface componentType="DisposalPanelComponent">
+        <cc:attribute name="demands" type="java.util.Collection" required="true" />
+        <cc:attribute name="selectedDemand" type="de.hub.cses.ces.entity.economy.DynamicDemand" required="true" />
+        <cc:attribute name="disposeListener" method-signature="void actionListener(javax.faces.event.ActionEvent)" />
+        <cc:attribute name="quantity" type="java.lang.Integer" />
+        <cc:attribute name="strictPrice" type="java.lang.Boolean" />
+        <cc:attribute name="strictQuantity" type="java.lang.Boolean" />
+        <cc:attribute name="priceVariationIndicator" type="java.lang.Integer" />
+        <cc:attribute name="quantityVariationIndicator" type="java.lang.Integer" />
+        <cc:attribute name="cancelListener" method-signature="void listener()" />
+        <cc:attribute name="changeListener" method-signature="void listener()" />
+    </cc:interface>
+
+    <cc:implementation>
+
+        <div id="#{cc.clientId}" style="min-height:320px;">
+
+            <h:panelGroup layout="block" style="width:75%;float:left;">
+
+                <p:dataTable id="table" var="demand" value="#{cc.attrs.demands}" rowKey="#{demand.id}"  selection="#{cc.attrs.selectedDemand}" selectionMode="single">
+
+                    <p:ajax event="rowSelect" update=":#{cc.clientId}" process="@this" />
+
+                    <f:facet name="header">
+                        <p:outputLabel value="#{i18n_txts.lbl_demands}" />
+                    </f:facet>
+
+                    <p:column headerText="#{i18n_txts.lbl_product}" style="text-align:left;">
+                        #{I18nTextUtil.get(demand.product.description)}
+                    </p:column>
+
+                    <p:column headerText="#{i18n_txts.lbl_requested_quantity}" style="text-align:center;">
+                        <p:outputLabel value="#{demand.quantity}">
+                            <f:convertNumber maxFractionDigits="0" />
+                        </p:outputLabel>
+                    </p:column>
+
+                    <p:column headerText="#{i18n_txts.lbl_unsatisfied_quantity}" style="text-align:center;">
+                        <p:outputLabel value="#{demand.availableQuantity}">
+                            <f:convertNumber maxFractionDigits="0" />
+                        </p:outputLabel>
+                    </p:column>
+
+                    <p:column headerText="#{i18n_txts.lbl_price_per_unit}" style="text-align:right;">
+                        <p:outputLabel value="#{demand.pricePerUnit}">
+                            <f:convertNumber groupingUsed="true" maxFractionDigits="2" type="currency" currencyCode="EUR" />
+                        </p:outputLabel>
+                    </p:column>
+
+                </p:dataTable>
+
+            </h:panelGroup>
+
+            <h:panelGroup layout="block" style="margin-left:1%;width:24%;float:left;background-color:rgba(211,211,211,0.1);">
+
+                <h:panelGroup layout="block" style="margin-top:10px;">
+                    <h:panelGrid columns="2" rendered="#{not empty cc.attrs.selectedDemand}" cellspacing="10">
+                        <p:outputLabel value="#{i18n_txts.lbl_product}: "/>
+                        <p:outputLabel value="#{I18nTextUtil.get(cc.attrs.selectedDemand.product.description)}" />
+                        <!-- -->
+                        <p:outputLabel value="#{i18n_txts.lbl_price_per_unit}: "/>
+                        <h:panelGrid columns="2">
+                            <p:outputLabel value="#{cc.attrs.selectedDemand.pricePerUnit}">
+                                <f:convertNumber groupingUsed="true" maxFractionDigits="2" type="currency" currencyCode="EUR" />
+                            </p:outputLabel>
+                            <p:outputLabel styleClass="#{cc.getStyleClass(cc.attrs.priceVariationIndicator)}"/>
+                        </h:panelGrid>
+                        <!-- -->
+                        <p:outputLabel value="#{i18n_txts.lbl_quantity}: " />
+                        <!-- -->
+                        <h:panelGrid columns="3" cellspacing="10">
+                            <h:panelGrid columns="1">
+                                <p:inputText id="quantity" value="#{cc.attrs.quantity}" size="6">
+                                    <p:ajax event="keyup" update="income" process="@this" listener="#{cc.attrs.changeListener}" />
+                                    <f:validateLongRange minimum="#{cc.min}" maximum="#{cc.max}" />
+                                </p:inputText>
+                                <p:slider for="quantity" style="width: 120px" minValue="#{cc.min}" maxValue="#{cc.max}">
+                                    <p:ajax event="slideEnd" update="income" process="@this,quantity" listener="#{cc.attrs.changeListener}" />
+                                </p:slider>
+                            </h:panelGrid>
+                            <p:outputLabel styleClass="#{cc.getStyleClass(cc.attrs.quantityVariationIndicator)}"/>
+                        </h:panelGrid>
+
+                        <!-- -->
+                        <p:outputLabel value="#{i18n_txts.lbl_total_income}: " />
+                        <h:panelGrid columns="2">
+                            <p:outputLabel id="income" value="#{cc.income}">
+                                <f:convertNumber groupingUsed="true" maxFractionDigits="2" type="currency" currencyCode="EUR" />
+                            </p:outputLabel>
+                            <p:outputLabel styleClass="#{cc.getStyleClass(cc.attrs.priceVariationIndicator)}"/>
+                        </h:panelGrid>
+                        <!-- -->
+                        <p:outputLabel value="#{i18n_txts.lbl_strict_price}" /><p:selectBooleanCheckbox value="#{cc.attrs.strictPrice}" />
+                        <p:outputLabel value="#{i18n_txts.lbl_strict_quantity}" /><p:selectBooleanCheckbox value="#{cc.attrs.strictQuantity}" />
+                        <p:commandButton id="dispose" process=":#{cc.clientId}" ajax="true" update=":#{cc.clientId}" value="#{i18n_txts.btn_dispose}" validateClient="true" actionListener="#{cc.attrs.disposeListener}" />
+                        <p:commandButton id="cancel" value="#{i18n_txts.btn_cancel}" immediate="true" ajax="true" process="@this" update=":#{cc.clientId}" actionListener="#{cc.attrs.cancelListener}" />
+
+                    </h:panelGrid>
+                    <p:message for="quantity" />
+                </h:panelGroup>
+
+            </h:panelGroup>
+
+            <h:panelGroup layout="block" style="clear:both;" />
+
+        </div>
+
+    </cc:implementation>
+
+</ui:component>
