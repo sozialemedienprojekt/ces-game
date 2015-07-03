@@ -41,10 +41,15 @@ import de.hub.cses.ces.entity.game.Game;
 import de.hub.cses.ces.entity.game.GameStatus;
 import de.hub.cses.ces.entity.market.Sector;
 import de.hub.cses.ces.entity.production.Production;
+import de.hub.cses.ces.entity.text.I18nText;
+import de.hub.cses.ces.entity.text.SupportedLanguage;
 import de.hub.cses.ces.event.Notification;
+import de.hub.cses.ces.event.NotificationType;
 import de.hub.cses.ces.jsf.bean.util.RedirectionUtil;
 import de.hub.cses.ces.service.observer.NotificationService;
 import de.hub.cses.ces.service.persistence.game.GameFacade;
+import de.hub.cses.ces.util.I18nTextUtil;
+import de.hub.cses.ces.util.NotificationUtil;
 import de.hub.cses.ces.util.qualifier.Identify;
 import java.io.IOException;
 import java.io.Serializable;
@@ -52,7 +57,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -69,6 +77,8 @@ import javax.inject.Named;
 @Named("PlayBean")
 @ViewScoped
 public class PlayBean implements Serializable {
+    
+    private String chatMessage;
 
     private Game game;
     private Long gameId;
@@ -111,13 +121,60 @@ public class PlayBean implements Serializable {
     @PostConstruct
     public void init() {
     }
+    
+
+    // Ole
+    public void sendChat() {
+        NotificationType type = null;
+        
+        String fullMessage = this.cooperator.getUser().getClientname() + ": " + getChatMessage(); 
+
+        Map<SupportedLanguage, String> msg = new HashMap<SupportedLanguage, String>();
+        msg.put(SupportedLanguage.DEUTSCH, fullMessage);
+        
+        long companyId = getCompany().getId();
+       
+//        NotificationUtil nu = new NotificationUtil();
+//        nu.notifyCompany(companyId, msg, NotificationType.INFO);
+//        nu.notifyGame(getGameId() , msg, NotificationType.INFO);
+//        nu.notifyClients(msg, NotificationType.INFO);
+        
+        Notification notification = new Notification(getCompany().getId(), NotificationType.INFO, new I18nTextUtil().create(msg));
+        notificationObserver.addCompanyNotification(notification);
+        
+        System.out.println("Notificationlist: " + notificationObserver.getAll(gameId, cooperator.getCompany().getId(), cooperator.getId(), cooperator.getUser().getId()).get(0));
+        
+//        Collection<Notification> c = getNotifications();
+//        System.out.println("Notifications: " + c.toString());
+    }
+    
+    
+        /**
+     *
+     * @return
+     */
+    // Ole
+    public String getChatMessage() {
+        return chatMessage;
+    }
+    
+        /**
+     *
+     * @param chatMessage
+     */
+    // Ole
+    public void setChatMessage(String chatMessage) {
+        this.chatMessage = chatMessage;
+    }
 
     /**
      *
      * @return
      */
     public Collection<Notification> getNotifications() {
-        List<Notification> notifications = notificationObserver.getAll(gameId, cooperator.getCompany().getId(), cooperator.getId(), cooperator.getUser().getId());
+//        List<Notification> notifications = notificationObserver.getAll(gameId, cooperator.getCompany().getId(), cooperator.getId(), cooperator.getUser().getId());
+        List<Notification> notifications = notificationObserver.getCompanyNotifications(cooperator.getCompany().getId());
+
         Collections.sort(notifications);
         return notifications;
     }

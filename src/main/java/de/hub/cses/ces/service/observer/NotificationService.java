@@ -24,9 +24,12 @@ package de.hub.cses.ces.service.observer;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+import de.hub.cses.ces.entity.text.SupportedLanguage;
 import de.hub.cses.ces.event.Notification;
+import de.hub.cses.ces.event.NotificationType;
 import de.hub.cses.ces.jsf.config.GamePlayComponent;
 import de.hub.cses.ces.util.ComponentUpdateUtil;
+import de.hub.cses.ces.util.I18nTextUtil;
 import de.hub.cses.ces.util.collection.ThreadSafeSizeLimitedCollection;
 import de.hub.cses.ces.util.qualifier.Notify;
 import de.hub.cses.ces.util.qualifier.Scope;
@@ -195,13 +198,15 @@ public class NotificationService implements Serializable {
      */
     public void addGloablNotification(@Observes @Notify(Scope.GLOBAL) Notification notification) {
         logger.log(Level.INFO, "notify");
+
         Lock writeLock = cooperatorNotificationLock.writeLock();
+
         try {
             writeLock.lock();
             cooperatorNotifications.values().stream().forEach((notifications) -> {
                 notifications.add(notification);
                 componentUpdateUtil.globalUpdate(GamePlayComponent.NOTIFICATION);
-                //push.fire(new WebSocketPush(notification.getId(), ClientAction.UPDATE, new GamePlayComponent[]{GamePlayComponent.NOTIFICATION}));
+//                push.fire(new WebSocketPush(notification.getId(), ClientAction.UPDATE, new GamePlayComponent[]{GamePlayComponent.NOTIFICATION}));
             });
         } finally {
             writeLock.unlock();
@@ -230,6 +235,7 @@ public class NotificationService implements Serializable {
         if (clientId != null) {
             notificationList.addAll(getClientNotifications(clientId));
         }
+
         return notificationList;
     }
 

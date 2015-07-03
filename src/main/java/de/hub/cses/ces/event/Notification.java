@@ -56,6 +56,7 @@ public final class Notification extends Event implements Comparable<Notification
     public NotificationType getType() {
         return type;
     }
+    
 
     /**
      *
