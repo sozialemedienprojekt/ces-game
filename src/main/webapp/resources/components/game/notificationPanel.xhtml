@@ -25,26 +25,27 @@
 
                 </p:dataList>
             </p:panel>-->
-            
-            <p:panel header="Chat" toggleable="true">
-                <p:dataList value="#{cc.attrs.notifications}" var="notification" type="ordered" paginator="false" itemType="none">
-                    <f:attribute name="filter" value="true" />
-                    <p:column>
-                        <h:outputText value="#{I18nTextUtil.get(notification.message)}" />
-                    </p:column>
 
-                </p:dataList>
+            <p:panel header="Chat" toggleable="true">
+                <p:scrollPanel style="width:300px;height:200px">
+                    <p:dataList value="#{cc.attrs.notifications}" var="notification" type="ordered" paginator="false" itemType="none">
+                        <f:attribute name="filter" value="true" />
+                        <p:column>
+                            <h:outputText value="#{I18nTextUtil.get(notification.message)}" />
+                        </p:column>
+                    </p:dataList>
+                </p:scrollPanel>
                 <h:inputText id="chatMessage" value="#{PlayBean.chatMessage}"/>
-                    <h:commandButton action="#{PlayBean.sendChat()}" value="Send"  />
+                <h:commandButton action="#{PlayBean.sendChat()}" value="Send"  />
             </p:panel>
 
 
-<!--            <h:form id="form">
-                <p:panel header="#{i18n_txts.lbl_notifications}" >
-                    <h:inputText id="chatMessage" value="#{PlayBean.chatMessage}"/>
-                    <h:commandButton action="#{PlayBean.sendChat()}" value="Send"  />
-                </p:panel>
-            </h:form>-->
+            <!--            <h:form id="form">
+                            <p:panel header="#{i18n_txts.lbl_notifications}" >
+                                <h:inputText id="chatMessage" value="#{PlayBean.chatMessage}"/>
+                                <h:commandButton action="#{PlayBean.sendChat()}" value="Send"  />
+                            </p:panel>
+                        </h:form>-->
 
         </div>
 
