@@ -3,7 +3,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:f="http://xmlns.jcp.org/jsf/core">
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
 
     <h:head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -16,6 +17,10 @@
         <ui:insert name="stylesheets"></ui:insert>
     </h:head>
     <h:body>
+        <ui:debug/> <!-- CTRL SHIFT D opens view tree -->
+        <ui:insert name="alertsBar"/> <!-- Cavan -->
+        <!-- <hr/> -->
+
         <h:panelGroup layout="block" id="all">
             <h:panelGroup layout="block" id="main">
                 <noscript><h1 style="color:rgb(153,0,0);text-align:center;">#{i18n_txts.msg_javascript_disabled}</h1></noscript>

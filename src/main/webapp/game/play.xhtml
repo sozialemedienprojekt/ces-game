@@ -113,6 +113,21 @@
 
             </p:outputPanel>
         </ui:define>
+
+        <!--Cavan-->
+        <ui:define name="alertsBar">
+            <h:form>
+                <!-- <p:notificationBar autoDisplay="true" styleClass="top" style=""/> -->
+                <p:toolbar>
+                    <f:facet name="left">
+                        <p:commandButton type="button" rendered="#{PlayBean.idleWorkersAlert}" value="Workers Idle!" />
+                        <p:commandButton type="button" rendered="#{PlayBean.negBalanceAlert}" value="Balance Negative!" />
+                        <p:commandButton type="button" rendered="#{PlayBean.outOfMaterialAlert}" value="Out of Material!" />
+                        <p:commandButton type="button" rendered="#{PlayBean.fullStoresAlert}" value="Warehouses Full!" />
+                    </f:facet>
+                </p:toolbar>
+            </h:form>
+        </ui:define>
     </ui:composition>
 </html>
 

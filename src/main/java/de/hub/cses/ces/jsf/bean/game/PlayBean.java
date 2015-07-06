@@ -34,17 +34,24 @@ import de.hub.cses.ces.entity.company.cooperator.role.MarketerRole;
 import de.hub.cses.ces.entity.company.cooperator.role.PurchaserRole;
 import de.hub.cses.ces.entity.company.cooperator.role.Role;
 import de.hub.cses.ces.entity.company.cooperator.role.SellerRole;
+import de.hub.cses.ces.entity.company.warehouse.Stock;
 import de.hub.cses.ces.entity.company.warehouse.Warehouse;
 import de.hub.cses.ces.entity.economy.DynamicDemand;
 import de.hub.cses.ces.entity.economy.DynamicSupply;
 import de.hub.cses.ces.entity.game.Game;
 import de.hub.cses.ces.entity.game.GameStatus;
 import de.hub.cses.ces.entity.market.Sector;
+import de.hub.cses.ces.entity.product.IntermediateProduct;
+import de.hub.cses.ces.entity.product.Part;
+import de.hub.cses.ces.entity.product.Product;
 import de.hub.cses.ces.entity.production.Production;
+import de.hub.cses.ces.entity.production.ProductionPlan;
+import de.hub.cses.ces.entity.text.SupportedLanguage;
 import de.hub.cses.ces.event.Notification;
 import de.hub.cses.ces.jsf.bean.util.RedirectionUtil;
 import de.hub.cses.ces.service.observer.NotificationService;
 import de.hub.cses.ces.service.persistence.game.GameFacade;
+import de.hub.cses.ces.util.I18nTextUtil;
 import de.hub.cses.ces.util.qualifier.Identify;
 import java.io.IOException;
 import java.io.Serializable;
@@ -52,7 +59,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -98,6 +107,77 @@ public class PlayBean implements Serializable {
     private boolean sellingTab = false;
     private boolean marketingTab = false;
 
+    //Cavan
+    //Functions to control alert buttons
+        
+    /*True if some production will be skipped tomorrow due to lack of raw materials*/
+    public boolean getOutOfMaterialAlert() {
+        //Get current stockpile
+        List<Stock> stocks = this.getWarehouse().getStocks();
+        //Get current production plan
+        List<ProductionPlan> PPL = this.getProduction().getProductionPlans();
+        
+        //Calculate daily consumption of stock
+        Map<IntermediateProduct, Double> usedDaily = new HashMap<>();
+        
+        for (ProductionPlan pp : PPL) 
+            if (pp.getWorkforce() > 0){
+                //calculate max. amount that could be produced
+                double producedDaily = (cooperator.getCompany().getEconomy().getMarket().getWorkingHoursPerDay() * pp.getWorkforce()) / pp.getFinalProduct().getRequiredWorkingTime();
+                
+                //add to consumption
+                for (Part p: pp.getFinalProduct().getPartsList().getParts())
+                    usedDaily.put(p.getIntermediateProduct(), 
+                            producedDaily * p.getQuantity() + 
+                            usedDaily.getOrDefault(p.getIntermediateProduct(), 0.0));        
+            }
+        
+        //Output it (debugging)
+        for (IntermediateProduct p : usedDaily.keySet())
+            System.out.println("Today Company " + cooperator.getCompany().getIdentifier() + " will use: " + usedDaily.get(p) + " " + p.getDescription().getText(SupportedLanguage.DEUTSCH));       
+        
+        //Check if Stores < Consumption
+        for (Stock s : stocks){
+            Product p = s.getProduct();
+            if (usedDaily.getOrDefault(p, -1.0) > s.getQuantity())
+                return true;
+        }
+        
+        return false;   
+    }
+
+    /*True if balance is negative*/
+    public boolean getNegBalanceAlert() {
+        if (this.getBalance().getAmount() < 0)
+             return true;
+        else 
+           return false;
+    }
+
+    /*True if there is idle core workforce*/
+    public boolean getIdleWorkersAlert() {
+        
+        int coreWorkforce = this.getFactory().getCoreWorkforce();
+        int busyWorkforce = 0;
+        
+        Collection<ProductionPlan> productionPlans = (List<ProductionPlan>) this.getProduction().getProductionPlans();
+        if (productionPlans != null && !productionPlans.isEmpty()) {
+            for (ProductionPlan productionPlan : productionPlans) {
+                busyWorkforce += productionPlan.getWorkforce();
+            }
+        }
+        
+        if (coreWorkforce - busyWorkforce > 1)
+                return true;
+        else
+            return false;
+    }
+
+    /*True if we have more than 15x the current max. demand for a finished good*/
+    public boolean getFullStoresAlert(){
+        return false;
+    }
+    
     /**
      *
      */
